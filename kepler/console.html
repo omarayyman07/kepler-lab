@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kepler Lab Console</title>
+<style>
+:root { --bg:#0f1115; --card:#181b21; --line:#2a2e36; --fg:#e9eaee; --muted:#9aa0ab;
+        --amber:#f0a050; --red:#ff5d5d; --blue:#5aa9ff; --green:#5fd19a; --grey:#7d8590; }
+* { box-sizing:border-box }
+body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui,Segoe UI,Roboto,sans-serif }
+main { max-width:1400px; margin:0 auto; padding:16px }
+header { display:flex; flex-wrap:wrap; gap:10px; align-items:baseline; margin-bottom:12px }
+header h1 { font-size:1.25rem; margin:0; letter-spacing:.04em }
+header h1 b { color:var(--amber) }
+.sub { color:var(--muted) }
+.badge { font-size:.75rem; font-weight:700; padding:2px 8px; border-radius:99px; border:1px solid currentColor }
+.badge.simulated { color:var(--amber) } .badge.real { color:var(--green) } .badge.unknown { color:var(--grey) }
+.spacer { flex:1 }
+.card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px }
+.grid { display:grid; gap:12px; grid-template-columns: minmax(0,3fr) minmax(0,2fr) }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr } }
+#stage { margin-bottom:12px; border-width:2px }
+#stage .label { font-size:.8rem; font-weight:800; letter-spacing:.12em }
+#stage .big { font-size:1.6rem; font-weight:700; margin:4px 0 6px }
+#stage ol { margin:6px 0 0; padding-left:1.4em; font-size:1.25rem } #stage li { margin:4px 0 }
+#stage.your_turn { border-color:var(--amber) } #stage.your_turn .label { color:var(--amber) }
+#stage.recording { border-color:var(--red) } #stage.recording .label { color:var(--red) }
+#stage.copy { border-color:var(--blue) } #stage.copy .label { color:var(--blue) }
+#stage.done { border-color:var(--green) } #stage.done .label { color:var(--green) }
+#stage.thinking .label, #stage.measuring .label, #stage.idle .label, #stage.stopped .label { color:var(--muted) }
+button.go { margin:14px 0 6px; font:800 1.6rem system-ui,sans-serif; padding:18px 36px; border-radius:12px;
+            border:0; background:var(--amber); color:#1a1205; cursor:pointer }
+button.go:hover:not(:disabled) { filter:brightness(1.1) }
+button.go:disabled { background:#3a3f48; color:var(--muted); cursor:default }
+.countdown { font-size:3.2rem; font-weight:800; font-variant-numeric:tabular-nums; color:var(--red) }
+video { width:100%; max-height:62vh; background:#000; border-radius:8px }
+.g { font-size:2rem; font-weight:800; font-variant-numeric:tabular-nums }
+.g small { font-size:1rem; color:var(--muted); font-weight:500 }
+h2 { font-size:.85rem; letter-spacing:.1em; color:var(--muted); margin:0 0 8px; text-transform:uppercase }
+.col { display:flex; flex-direction:column; gap:12px }
+.chip { display:inline-block; font-size:.75rem; padding:1px 8px; border-radius:99px; border:1px solid var(--line); color:var(--muted); margin-right:4px }
+.chip.ok { color:var(--green); border-color:currentColor } .chip.bad { color:var(--red); border-color:currentColor }
+.chip.leading { color:var(--green); border-color:currentColor } .chip.alive { color:var(--amber); border-color:currentColor }
+.chip.ruled { color:var(--grey); border-color:var(--line); text-decoration:line-through }
+table { width:100%; border-collapse:collapse; font-size:.9rem }
+td, th { text-align:left; padding:4px 6px; border-bottom:1px solid var(--line); vertical-align:top }
+td.num { font-variant-numeric:tabular-nums; white-space:nowrap }
+tr.ruled td { color:var(--grey) }
+.why { border-left:3px solid var(--amber); padding-left:10px; white-space:pre-wrap }
+.warn { color:var(--amber); font-size:.9rem }
+.trials { display:grid; gap:8px }
+.trial { padding:10px 12px } .trial h3 { margin:0 0 4px; font-size:1rem }
+details summary { cursor:pointer; color:var(--muted) }
+.mono { font-family:ui-monospace,Consolas,monospace; font-size:.8rem; color:var(--muted) }
+#conn { font-size:.8rem }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1><b>KEPLER</b> Lab Console</h1>
+    <span class="sub" id="title"></span>
+    <span class="badge unknown" id="prov">…</span>
+    <span class="spacer"></span>
+    <span class="sub" id="spend"></span>
+    <span class="sub" id="conn"></span>
+  </header>
+
+  <section id="stage" class="card idle">
+    <div class="label" id="stage-label">WAITING</div>
+    <div class="big" id="stage-big">Waiting for the session to start…</div>
+    <div id="stage-body"></div>
+  </section>
+
+  <div class="grid">
+    <div class="col">
+      <div class="card">
+        <h2 id="video-title">Latest overlay</h2>
+        <video id="video" controls muted autoplay loop playsinline></video>
+        <div class="sub" id="video-caption">No overlay yet.</div>
+      </div>
+      <div class="card">
+        <h2>Hypotheses (latest trial, ranked by BIC)</h2>
+        <div id="laws" class="sub">No fits yet.</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <h2>g</h2>
+        <div class="g" id="g">—</div>
+        <div class="sub" id="g-note"></div>
+      </div>
+      <div class="card">
+        <h2>Technician</h2>
+        <div id="tech" class="sub">—</div>
+      </div>
+      <div class="card">
+        <h2>Scientist's reasoning</h2>
+        <div id="why" class="sub">—</div>
+      </div>
+      <div class="card" id="findings-card" hidden>
+        <h2>Findings</h2>
+        <div id="findings"></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="margin-top:16px">Trials</h2>
+  <div class="trials" id="trials"><div class="sub">None yet.</div></div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let state = null, clockSkew = 0, shownVideo = "";
+let sentToken = "", goError = "";   // one click per YOUR TURN prompt
+
+document.addEventListener("click", async (ev) => {
+  const b = ev.target.closest("#go");
+  if (!b || b.disabled) return;
+  const token = b.dataset.token;
+  sentToken = token; goError = "";
+  b.disabled = true; b.textContent = "Sending…";
+  try {
+    const r = await fetch("/api/go", {method: "POST", headers: {"Content-Type": "application/json"},
+                                      body: JSON.stringify({token})});
+    if (!r.ok) goError = `Not sent (${r.status}): press Enter in the terminal`;
+  } catch (e) {
+    goError = "Not sent (console server unreachable): press Enter in the terminal";
+  }
+  renderStage();
+});
+
+const STAGES = {
+  your_turn: ["YOUR TURN", "Set up the trial"],
+  recording: ["RECORDING", "Hands off, keep recording"],
+  copy:      ["STOP & COPY", "Stop recording and copy the clip"],
+  measuring: ["MEASURING", "SAM 3.1 and the analysis are running"],
+  thinking:  ["SCIENTIST", "The scientist is thinking"],
+  released:  ["RELEASE", "Let go now"],
+  done:      ["DONE", "Session finished"],
+  stopped:   ["STOPPED", "Session stopped"],
+  idle:      ["WAITING", "Waiting for the session to start…"],
+};
+
+function fmt(x, d = 4) { return (x === null || x === undefined || isNaN(x)) ? "—" : Number(x).toFixed(d); }
+
+function renderStage() {
+  // a finished session from before the console existed has no live file: show its conclusion
+  const live = state?.live || (state?.conclusion ? {stage: "done", message: state.conclusion} : null);
+  const stage = live?.stage || "idle";
+  const [label, big] = STAGES[stage] || [stage.toUpperCase(), ""];
+  $("stage").className = "card " + stage;
+  const trial = live?.trial ? ` · trial ${live.trial}${live.budget ? "/" + live.budget : ""}` : "";
+  $("stage-label").textContent = label + trial;
+  let bigText = big, body = "";
+  if (stage === "your_turn" || stage === "copy") {
+    if (live.setting) bigText = live.setting;
+    body = "<ol>" + (live.steps || []).map((s) => `<li>${esc(s)}</li>`).join("") + "</ol>";
+    if (stage === "your_turn" && live.seconds) body += `<div class="sub">Then keep recording for ${Math.round(live.seconds)} s.</div>`;
+    if (stage === "your_turn" && live.go_token) {
+      const sent = sentToken === live.go_token;
+      body += `<button id="go" class="go" data-token="${esc(live.go_token)}" ${sent ? "disabled" : ""}>` +
+              `${sent ? (goError || "Sent: let go now") : "Ready – release"}</button>` +
+              `<div class="sub">Same as pressing Enter in the session terminal. Press it while holding the bob and recording.</div>`;
+    }
+  } else if (stage === "recording") {
+    const left = Math.max(0, (live.until || 0) - (Date.now() / 1000 - clockSkew));
+    body = `<div class="countdown">${left.toFixed(0)} s</div><div class="sub">left, hands off the pendulum and the phone</div>`;
+  } else if (live?.message) {
+    body = `<div class="why">${esc(live.message)}</div>`;
+  }
+  if (live && live.age_s > 600 && stage !== "done") body += `<div class="warn">No update for ${Math.round(live.age_s / 60)} min. Is the session still running?</div>`;
+  $("stage-big").textContent = bigText;
+  $("stage-body").innerHTML = body;
+}
+
+function lawTable(family, rows) {
+  return `<h3 style="font-size:.95rem;margin:6px 0">${esc(family)}</h3><table><tr><th>law</th><th>ΔBIC</th><th></th><th>parameters</th></tr>` +
+    rows.map((r) => {
+      const cls = r.verdict === "leading" ? "leading" : r.verdict === "alive" ? "alive" : "ruled";
+      return `<tr class="${cls === "ruled" ? "ruled" : ""}"><td>${esc(r.name)}</td><td class="num">${r.dbic === null ? "—" : r.dbic.toFixed(1)}</td>` +
+             `<td><span class="chip ${cls}">${esc(r.verdict)}</span></td><td class="mono">${esc(r.params)}</td></tr>`;
+    }).join("") + "</table>";
+}
+
+function render() {
+  if (!state) return;
+  $("title").textContent = `${state.title} · ${state.session}`;
+  const prov = state.provenance;
+  $("prov").className = "badge " + prov;
+  $("prov").textContent = prov === "simulated" ? "SIMULATED DATA" : prov === "real" ? "REAL DATA" : "PROVENANCE NOT RECORDED";
+  const live = state.live || {};
+  $("spend").textContent = live.usd_spent !== undefined ? `spent $${fmt(live.usd_spent, 2)}${live.usd_cap ? " of $" + fmt(live.usd_cap, 2) : ""}` : "";
+  renderStage();
+
+  const trials = state.trials;
+  const last = trials[trials.length - 1];
+  const withVideo = [...trials].reverse().find((t) => t.overlay);
+  if (withVideo && withVideo.overlay !== shownVideo) {
+    shownVideo = withVideo.overlay;
+    $("video").src = "/files/" + encodeURIComponent(withVideo.overlay);
+    $("video-title").textContent = `Latest overlay · trial ${withVideo.n}`;
+    $("video-caption").textContent = `${withVideo.heading} · ${withVideo.summary}`;
+  }
+
+  if (last) {
+    const h = last.headline || {};
+    if (h.g !== undefined) {
+      $("g").innerHTML = `${fmt(h.g, 3)} <small>± ${fmt(h.g_err_total, 3)} m/s²</small>`;
+      $("g-note").textContent = `trial ${last.n}, best-ranked period law; error includes the length uncertainty (fit alone ± ${Number(h.g_err).toPrecision(2)})`;
+    } else if (h.v_terminal !== undefined) {
+      $("g").innerHTML = `${fmt(h.v_terminal, 3)} <small>± ${fmt(h.v_terminal_err_total, 3)} m/s terminal velocity</small>`;
+      $("g-note").textContent = `trial ${last.n}`;
+    }
+    const ok = last.usable;
+    const issues = (last.qc_issues || []).map(esc).join("; ");
+    const ev = (last.evidence_failures || []).map(esc).join("; ");
+    $("tech").innerHTML =
+      `<span class="chip ${ok ? "ok" : "bad"}">${ok ? "usable" : "rejected"}</span>` +
+      `<span class="chip">technician: ${esc(last.qc_status)}</span><span class="chip">${esc(last.tracker)}</span>` +
+      (issues ? `<div>Issues: ${issues}</div>` : "") + (last.qc_notes ? `<div>${esc(last.qc_notes)}</div>` : "") +
+      (ev ? `<div class="warn">Evidence checks failed: ${ev}</div>` : "");
+    const lawsHtml = Object.entries(last.laws || {}).map(([f, rows]) => lawTable(f, rows)).join("");
+    $("laws").innerHTML = lawsHtml || "No fits for this trial.";
+  }
+  const planned = state.planned[state.planned.length - 1];
+  const whySrc = (planned && (!last || planned.n > last.n)) ? planned : last;
+  $("why").innerHTML = whySrc && whySrc.why ? `<div class="sub">Trial ${whySrc.n}: ${esc(whySrc.heading)}</div><div class="why">${esc(whySrc.why)}</div>` : "—";
+
+  $("findings-card").hidden = !state.findings.length;
+  $("findings").innerHTML = state.findings.map((f) =>
+    `<div style="margin-bottom:8px"><span class="chip leading">${esc(f.confidence)}</span> ${esc(f.claim)}</div>`).join("");
+
+  $("trials").innerHTML = trials.length ? [...trials].reverse().map((t) => {
+    const h = t.headline || {};
+    const g = h.g !== undefined ? ` · g = ${fmt(h.g, 3)} ± ${fmt(h.g_err_total, 3)}` : "";
+    const warn = (t.warnings || []).filter((w) => !w.startsWith("Evidence checks failed"));
+    return `<div class="card trial"><h3>Trial ${t.n}: ${esc(t.heading)}</h3>` +
+      `<span class="chip ${t.usable ? "ok" : "bad"}">${t.usable ? "usable" : "rejected"}</span>` +
+      `<span class="chip">technician: ${esc(t.qc_status)}</span><span class="sub">${esc(t.summary)}${g}</span>` +
+      (t.why ? `<details><summary>Why this trial</summary><div class="why">${esc(t.why)}</div></details>` : "") +
+      (warn.length ? `<details><summary>${warn.length} note(s)</summary>${warn.map((w) => `<div class="warn">${esc(w)}</div>`).join("")}</details>` : "") +
+      `</div>`;
+  }).join("") : `<div class="sub">None yet.</div>`;
+}
+
+async function poll() {
+  try {
+    const r = await fetch("/api/state", {cache: "no-store"});
+    state = await r.json();
+    clockSkew = Date.now() / 1000 - state.now;
+    $("conn").textContent = "live";
+    render();
+  } catch (e) {
+    $("conn").textContent = "console server not reachable";
+  }
+}
+poll();
+setInterval(poll, 1000);
+setInterval(renderStage, 250);
+</script>
+</body>
+</html>
