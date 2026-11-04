@@ -1,0 +1,8 @@
+openai>=1.60
+meta-sam-parser>=0.1.0
+numpy
+scipy
+opencv-python
+matplotlib
+pyserial      # only for the servo+magnet releaser
+pytest        # tests

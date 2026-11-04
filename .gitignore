@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Keys and local secrets (MODEL_API_KEY lives in the environment, never in the repo)
+.env
+.env.*
+keys/
+*.key
+*.pem
+secrets*
+
+# Raw footage and run output: clips, sessions (sim, rehearsal and live), paid-API caches, video
+clips/
+sessions/
+*.MOV
+*.mov
+*.mp4
+*.sam-*.txt
+*.qc-*.txt
+*.cal-*.json
+*.tmp.mp4
+_analysis.py
+console.json
+console_go.json
+
+# Curated, published results are the exception: small, checked by hand, needed to reproduce
+!results/**
+!results/**/*.mp4
+!results/**/*.sam-*.txt
+!results/**/*.qc-*.txt
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
