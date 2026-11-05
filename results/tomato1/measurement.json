@@ -1,0 +1,52 @@
+{
+  "trial": 1,
+  "clip": "(raw footage not published)",
+  "usable": true,
+  "experiment": "pendulum",
+  "setting": "release at 30\u00b0",
+  "qc_issues": [],
+  "qc_notes": "Pendulum swings cleanly in-plane with decaying amplitude, string taut throughout and no contact after release.",
+  "qc_status": "pass",
+  "evidence_failures": [
+    "bob path deviates 5.1px rms from a circle",
+    "the circle through the bob's path is centred 37px (5.3% of its radius) to the side of the measured pivot: the path is not a circle about the pivot (camera not square to the swing plane, or the string bends below the pivot)"
+  ],
+  "tracker": "SAM 3.1",
+  "track_phrase": "red tomato",
+  "summary": "39 full cycles, amplitude 6.8\u00b0\u201327.8\u00b0",
+  "laws": {
+    "period law": [
+      "free quadratic: \u0394BIC=0.0  rms=0.00504  g=10.043\u00b10.013, c=0.0782733\u00b10.0077",
+      "exact (elliptic integral): \u0394BIC=0.2  rms=0.00529  g=10.0242\u00b10.0087",
+      "quadratic correction: \u0394BIC=0.6  rms=0.00532  g=10.0237\u00b10.0087",
+      "isochronous (small-angle): \u0394BIC=48.8  rms=0.00987  g=9.94756\u00b10.016"
+    ],
+    "damping law": [
+      "viscous + air drag: \u0394BIC=0.0  rms=0.00354  A0=0.482664\u00b10.0025, a=0.00635984\u00b10.0014, b=0.139157\u00b10.0055",
+      "quadratic (air drag) damping: \u0394BIC=14.4  rms=0.00447  A0=0.488893\u00b10.0027, b=0.164207\u00b10.0015",
+      "linear (viscous) damping: \u0394BIC=111.3  rms=0.0155  A0=0.438914\u00b10.0068, a=0.0407142\u00b10.0011",
+      "dry (Coulomb) friction: \u0394BIC=170.2  rms=0.0329  A0=0.38416\u00b10.011, c=0.00836273\u00b10.00049"
+    ]
+  },
+  "headline": {
+    "pivot_side_offset_px": 37.24278524791539,
+    "pivot_along_offset_px": 144.3186066651489,
+    "pivot_side_offset_frac": 0.05294043323688935,
+    "circle_radius_px": 703.4847085830854,
+    "g": 10.043026779199943,
+    "g_err": 0.01262293608012124,
+    "g_err_total": 0.052500991697654764,
+    "wobble_deg": 10.18340994945823,
+    "wobble_dg": 0.04984971485790979
+  },
+  "warnings": [
+    "Camera-motion correction not used: it raised the period scatter from 5.3 to 9.7 ms (camera moved 46px horizontally and 23px vertically; pivot feature found in 98% of frames).",
+    "Pivot measured offline as the top end of the dark string, at 491.5,285.0px (scatter 4.4px over the sampled frames); circle-fit centre 524.6,430.3px.",
+    "Angles measured about the circle-fit centre.",
+    "Bob path deviates 5.1px from a circle (string slack or tracking jitter).",
+    "Out-of-plane wobble: the bob's distance from the pivot varies by up to 11px (1.6% of the radius). Read as toward/away-from-camera motion, that is at most 10.2\u00b0 out of plane, which would shift g by +0.0498 m/s\u00b2 (+0.50%); upper bound, counted in no error bar.",
+    "Evidence checks failed (kept, technician passed it): bob path deviates 5.1px rms from a circle; the circle through the bob's path is centred 37px (5.3% of its radius) to the side of the measured pivot: the path is not a circle about the pivot (camera not square to the swing plane, or the string bends below the pivot)"
+  ],
+  "plot": "plot.png",
+  "overlay": "overlay.mp4"
+}
