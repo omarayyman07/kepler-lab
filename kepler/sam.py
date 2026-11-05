@@ -138,10 +138,16 @@ async def _segment(content: list[dict], *, video: bool,
     return await _observations_from_events(events, video=video)
 
 
+# Every SAM cache file read or written in this process, in order: (file, key). The lab
+# records them, so a published result names the exact raw SAM output it came from.
+USED_CACHES: list[tuple[Path, str]] = []
+
+
 def _video_request(clip: Path, text: str, key: str, get_fid, use_cache: bool,
                    metadata: dict | None = None) -> list[Observation]:
     """One cached SAM video request. `text` is a noun phrase or object-prompt tokens."""
     cache = cache_path(clip, key)
+    USED_CACHES.append((cache, key))
     if use_cache and cache.exists():
         return observations_from_text(cache.read_text(), video=True)
     content = [
@@ -185,6 +191,20 @@ def backfill_start(clip: Path, obs: list[Observation], concept: str, get_fid,
     text = box_prompt(first, first.frame, info.width, info.height)
     back = _video_request(clip, text, f"{concept}|backward|{text}", get_fid, use_cache,
                           metadata={"propagation_direction": "backward"})
+    return merge_backfill(obs, back)
+
+
+def merge_backfill(obs: list[Observation], back: list[Observation]) -> list[Observation]:
+    """Merge a backward box-prompted pass into the concept pass (same rule live and in replay)."""
+    if not obs:
+        return obs
+    counts: dict[str, int] = {}
+    for o in obs:
+        counts[o.object_id] = counts.get(o.object_id, 0) + 1
+    target = max(counts, key=counts.get)
+    first = min((o for o in obs if o.object_id == target), key=lambda o: o.frame)
+    if first.frame == 0:
+        return obs
     # One box prompt should give one object; if SAM splits it, keep the one that
     # sits on the prompt box at the prompt frame.
     at_prompt = [o for o in back if o.frame == first.frame]

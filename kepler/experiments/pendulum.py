@@ -69,6 +69,10 @@ class PendulumExperiment(Experiment):
             return "a simple pendulum swinging freely"
         return f"pendulum released from about {value:.0f} degrees"
 
+    def replay_params(self) -> dict:
+        return {"length_m": self.length_m, "bob_radius_m": self.bob_radius_m, "length_err_m": self.length_err_m,
+                "pivot_mode": self.pivot_mode, "max_pivot_offset": self.max_pivot_offset}
+
     def pull_cm(self, angle_deg: float) -> tuple[float, float]:
         """Sideways distance from the rest position, and rise, for this angle (cm)."""
         a = np.radians(abs(angle_deg))
@@ -108,6 +112,7 @@ class PendulumExperiment(Experiment):
         L_eff = pendulum.effective_length(self.length_m, self.bob_radius_m)
         track = pendulum.build_track(obs, timestamps)
         camera = self._stabilise(obs, track, timestamps, ctx)
+        candidate = camera            # recorded for replay even if the evidence rejects it below
         if camera is not None:
             # Correcting for camera motion can also add noise (the swinging string crossing the
             # tracked feature). Keep it only if the cycle-to-cycle timing gets more consistent.
@@ -172,12 +177,23 @@ class PendulumExperiment(Experiment):
             m.summary += f", amplitude {amp.min():.1f}°–{amp.max():.1f}°"
             m.rows = [{"t_mid_s": f"{t:.6f}", "amplitude_rad": f"{a:.8f}", "period_s": f"{p:.8f}"}
                       for t, a, p in zip(c.t_mid, c.amplitude, c.period)]
+        m.replay = {
+            "camera": None if candidate is None else {
+                "offsets": candidate.offsets.tolist(), "valid": candidate.valid.tolist(),
+                "ref_frame": candidate.ref_frame, "seed": list(candidate.seed), "scores": candidate.scores.tolist()},
+            "measured_pivot": None if pivot is None else [float(pivot[0]), float(pivot[1])],
+        }
         return m
 
     def _stabilise(self, obs, track, timestamps, ctx: TrialContext, min_motion_px: float = 1.0,
                    min_valid: float = 0.5):
         """Camera motion from the pivot feature; None when the camera held still, there is no
         feature, or it was found in too few frames to trust."""
+        if ctx.replay is not None:   # the live run's camera track, as recorded
+            c = ctx.replay.get("camera")
+            return None if not c else stabilise.CameraMotion(
+                np.array(c["offsets"], float), np.array(c["valid"], bool), int(c["ref_frame"]),
+                tuple(c["seed"]), np.array(c["scores"], float))
         if not self.stabilise or not Path(ctx.clip).exists():
             return None
         cam = stabilise.track_pivot(ctx.clip, track.x, track.y, track.t, timestamps)
@@ -190,6 +206,12 @@ class PendulumExperiment(Experiment):
     def _measured_pivot(self, ctx: TrialContext, camera, fit_run, notes: list[str]):
         """The pivot measured directly, in the track's coordinates: SAM on the pivot hardware
         ('black knot', 'nail') if asked, else the top end of the dark string, found offline."""
+        if ctx.replay is not None:
+            p = ctx.replay.get("measured_pivot")
+            if p is not None:
+                notes.append(f"Pivot as measured in the live run, at {p[0]:.1f},{p[1]:.1f}px.")
+                return float(p[0]), float(p[1])
+            return None
         if ctx.segment_video is not None:
             p = self._sam_pivot(ctx, camera, fit_run, notes)
             if p is not None:

@@ -103,6 +103,28 @@ def _preflight(exp, a, recorder, *, wait: bool, live: bool) -> None:
         input(">>> Press Enter to start the session ... ")
 
 
+def cmd_replay(a, p):
+    from .replay import compare, replay
+
+    data, m, failures = replay(a.folder)
+    print(f"Replaying {a.folder}: {data['phrase']!r} tracked by {data['tracker']}, "
+          f"technician {data['qc']['status']}; {m.summary}")
+    for family, fits in m.laws.items():
+        print(f"\n{family.capitalize()} (ranked by BIC):")
+        for f in fits:
+            print("  " + f.summary())
+    h = m.headline
+    if "g" in h:
+        print(f"\ng = {h['g']:.4f} ± {h['g_err_total']:.4f} m/s² (fit ± {h['g_err']:.4f}, plus length uncertainty)")
+    for fl in failures:
+        print("FLAG: " + fl)
+    bad = compare(data["result"]["headline"], h)
+    print("\nREPRODUCED: every published number matches." if not bad else
+          "\nNOT REPRODUCED:\n  " + "\n  ".join(bad))
+    if bad:
+        raise SystemExit(1)
+
+
 def cmd_console(a, p):
     from .console import serve
 
@@ -235,6 +257,10 @@ def main():
     l.add_argument("--max-usd", type=float, default=5.0, help="stop the scientist at this spend")
     l.add_argument("--session")
     l.set_defaults(func=cmd_lab)
+
+    rp = sub.add_parser("replay", help="reproduce a published result from its cached SAM output (no API key)")
+    rp.add_argument("folder", help="e.g. results/tomato1")
+    rp.set_defaults(func=cmd_replay)
 
     c = sub.add_parser("console", help="live Lab Console in the browser, following a session folder")
     c.add_argument("session")

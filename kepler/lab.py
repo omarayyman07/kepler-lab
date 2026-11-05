@@ -93,7 +93,9 @@ def measure_trial(raw_clip: str | Path, out_dir: str | Path, *, trial: int, expe
         segment_image = lambda img, _phrase: mock_sam.observations_for_image(img, ref_colour)  # noqa: E731
         segment_video = None
     else:
+        first_cache = len(sam.USED_CACHES)
         obs = sam.segment_video(clip, phrase, file_id=file_id)
+        sam_caches = [{"file": p.name, "key": k} for p, k in sam.USED_CACHES[first_cache:]]
         segment_image = sam.segment_image
 
         def segment_video(concept: str) -> list[sam.Observation]:
@@ -147,6 +149,17 @@ def measure_trial(raw_clip: str | Path, out_dir: str | Path, *, trial: int, expe
     if res.usable and m.rows:   # rejected runs never enter the pooled data
         append_rows(out_dir / exp.data_file, trial, list(exp.columns), m.rows)
     _save(res, out_dir)
+    if mock is None and exp.replay_params() is not None:
+        # Everything `kepler replay` needs besides the raw SAM output: no video, no API key.
+        (out_dir / f"trial{trial:02d}.replay.json").write_text(json.dumps({
+            "experiment": exp.name, "params": exp.replay_params(), "control_value": control_value,
+            "phrase": phrase, "tracker": res.tracker, "qc": {"status": res.qc_status, "issues": res.qc_issues,
+                                                            "notes": res.qc_notes},
+            "frame_size": [info.width, info.height], "n_frames": info.n_frames,
+            "timestamps": [float(t) for t in timestamps], "sam_caches": sam_caches, **m.replay,
+            "result": {"summary": res.summary, "headline": res.headline, "laws": res.laws,
+                       "evidence_failures": res.evidence_failures, "usable": res.usable},
+        }, default=str), encoding="utf-8")
     return res, m
 
 

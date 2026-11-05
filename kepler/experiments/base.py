@@ -52,6 +52,8 @@ class TrialContext:
     frame_size: tuple[int, int] | None = None   # (width, height) of the prepared clip
     # concept -> SAM observations over the whole clip (live, cached); None offline
     segment_video: Callable[[str], list[Observation]] | None = None
+    # Replay (no video): what the live run measured on the picture itself, re-used as recorded
+    replay: dict | None = None
 
 
 @dataclass
@@ -63,6 +65,7 @@ class Measurement:
     warnings: list[str] = field(default_factory=list)
     evidence_failures: list[str] = field(default_factory=list)
     run: object = None                  # the plugin's own analysis object (plots, overlay)
+    replay: dict = field(default_factory=dict)   # video-derived inputs a replay needs (camera track, pivot)
 
 
 class Experiment(ABC):
@@ -109,6 +112,10 @@ class Experiment(ABC):
     def truth_note(self, sim) -> str:
         """Notebook setting line for a simulated session (the true parameters)."""
         return ""
+
+    def replay_params(self) -> dict | None:
+        """Constructor arguments that rebuild this plugin for `kepler replay`; None = not supported."""
+        return None
 
     def preflight(self) -> list[str]:
         """Checklist shown to the person once, before a hand-run session starts."""
