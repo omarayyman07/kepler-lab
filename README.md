@@ -1,5 +1,9 @@
 # Kepler: an autonomous desk lab
 
+
+https://github.com/user-attachments/assets/db5fd873-7df0-4a81-a3cd-86609f7a6ca4
+
+
 **A phone camera is the instrument, Muse Wonder is the scientist, and a human is the hands.**
 
 Kepler runs the scientific method on a real physical experiment. It starts from competing
