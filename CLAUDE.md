@@ -49,6 +49,8 @@ python -m kepler lab --length 0.80 --budget 6 --camera 0   # real session, webca
 python -m kepler lab --length 0.80 --budget 6 --drop ./incoming          # phone clips dropped into a folder
 python -m kepler lab --length 0.53 --budget 6 --sim --drop clips/session_rehearsal   # rehearse the hand-run flow (simulated phone)
 python -m kepler console sessions/<name>                   # live Lab Console at http://127.0.0.1:8765 (reads the session folder + console.json)
+python -m kepler replay results/<name>                     # reproduce a published result from cached SAM output (no key, no video)
+python -m kepler showcase [--feed]                         # rebuild docs/showcase (GitHub Pages "Kepler Lab Replay"); --feed may call muse-wonder once per trial
 python -m kepler lab --length 0.80 --budget 6 --serial /dev/ttyUSB0      # servo + magnet releaser
 
 # falling paper cone (coffee filters): reference object of known size sets metres/pixel

@@ -10,6 +10,10 @@ number goes into a lab notebook.
 Built for the **Meta Global AI Developer Hackathon** (Meta × Cerebral Valley, Nov 2026).
 Track: Indie Developer. Problem statement: Push the Frontier.
 
+**[Kepler Lab Replay](https://omarayyman07.github.io/kepler-lab/showcase/)**: the two real trials
+playing side by side in your browser, with the SAM 3.1 track drawn over the footage and the
+competing laws, ΔBIC and g updating cycle by cycle, using only what was known at each moment.
+
 ---
 
 ## Results
@@ -105,6 +109,7 @@ Reproduce the real results from cached SAM output (no API key, no video):
 ```bash
 python -m kepler replay results/tomato1
 python -m kepler replay results/real1
+python -m kepler showcase --reuse   # rebuild the Lab Replay page in docs/showcase (no API key needed)
 ```
 
 Measure a clip (needs `MODEL_API_KEY` from dev.meta.ai):
