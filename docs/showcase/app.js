@@ -120,9 +120,9 @@ function buildHyps(container, laws, key) {
     const card = document.createElement("div");
     card.className = "hyp";
     card.dataset.id = law.id;
-    card.innerHTML = `<div class="row"><span class="id">${law.id}</span><b>${esc(law.label)}</b></div>
-      <div class="math eq"></div><div class="row badges"></div>`;
-    tex(card.querySelector(".eq"), law.tex);
+    card.innerHTML = `<div class="hname"><span class="id">${law.id}</span>${esc(law.label)}</div>
+      <div class="eq"></div><div class="badges"></div>`;
+    tex(card.querySelector(".eq"), String.raw`\displaystyle ` + law.tex, false);   // full-size maths, one line
     card.addEventListener("mouseenter", () => { hoverLaw = law.id; });
     card.addEventListener("mouseleave", () => { hoverLaw = null; });
     el.appendChild(card);
