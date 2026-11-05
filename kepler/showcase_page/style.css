@@ -57,7 +57,7 @@ h3 { font-size:.9rem; margin:0 }
 
 /* law rows: name | equation on one line, status chips under it */
 .hyps { display:grid; gap:4px }
-.hyp { display:grid; grid-template-columns:minmax(96px,auto) minmax(0,1fr); grid-template-areas:"name eq" "badges badges";
+.hyp { display:grid; grid-template-columns:auto minmax(0,1fr); grid-template-areas:"name badges" "eq eq";
        align-items:center; gap:0 8px; background:var(--card2); border:1px solid var(--line); border-radius:8px; padding:3px 8px;
        transition:border-color .2s, box-shadow .2s }
 .hyp .hname { grid-area:name; font-size:.82rem; font-weight:700; white-space:nowrap }
@@ -129,4 +129,16 @@ h3 { font-size:.9rem; margin:0 }
   .hyp { padding:2px 8px }
   .plot-card .plot canvas { min-height:110px }
   .evidence .stmt { padding:3px 7px }
+}
+
+/* law equations: full width under the name, real derivations (series, elliptic integral, AGM) */
+.hyp .eq { text-align:left; padding:0 2px }
+.hyp .eq .katex-display { margin:2px 0; text-align:left }
+.hyp .eq .katex-display > .katex { text-align:left }
+.hyp .eq .katex { font-size:.96em }
+#bic-def .katex { font-size:.9em }
+#bic-def .katex-display { margin:0 0 4px }
+@media (min-width:1100px) and (min-height:600px) and (max-height:860px) {
+  .hyp .eq .katex { font-size:.84em }
+  #bic-def .katex { font-size:.8em }
 }

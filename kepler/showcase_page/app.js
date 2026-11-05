@@ -3,24 +3,45 @@
 // uses snapshots of cycles completed before t (precomputed in Python, see kepler/showcase.py).
 "use strict";
 
+// Each law as the analysis uses it: the equation of motion it comes from, the period or envelope
+// it predicts, and (for the exact law) how K is evaluated. The fitted forms are the ones in
+// kepler/pendulum.py; nothing here is decoration.
 const PERIOD_LAWS = [
   { id: "H1", name: "isochronous (small-angle)", label: "small-angle",
-    tex: String.raw`T = 2\pi\sqrt{\frac{L}{g}}` },
+    tex: String.raw`\ddot{\theta} + \frac{g}{L}\,\theta = 0
+      \;\;\Longrightarrow\;\; T = 2\pi\sqrt{\frac{L}{g}}\quad(\text{independent of }\theta_0)` },
   { id: "H2", name: "quadratic correction", label: "series",
-    tex: String.raw`T = 2\pi\sqrt{\frac{L}{g}}\left(1+\frac{\theta_0^{2}}{16}\right)` },
+    tex: String.raw`\begin{aligned}
+      T &= 2\pi\sqrt{\frac{L}{g}}\;\sum_{n=0}^{\infty}\left[\frac{(2n)!}{2^{2n}\,(n!)^{2}}\right]^{2}\sin^{2n}\!\frac{\theta_0}{2}
+         = 2\pi\sqrt{\frac{L}{g}}\left(1+\frac{\theta_0^{2}}{16}+\frac{11\,\theta_0^{4}}{3072}+\cdots\right)\\
+      T &\approx 2\pi\sqrt{\frac{L}{g}}\left(1+\frac{\theta_0^{2}}{16}\right) \qquad \text{(fitted: first order in } \theta_0^{2}\text{)}
+    \end{aligned}` },
   { id: "H3", name: "exact (elliptic integral)", label: "exact",
-    tex: String.raw`T = 4\sqrt{\frac{L}{g}}\;K\!\left(\sin^{2}\frac{\theta_0}{2}\right)` },
+    tex: String.raw`\begin{aligned}
+      \ddot{\theta} + \frac{g}{L}\sin\theta = 0 \;\;\Longrightarrow\;\; T &= 4\sqrt{\frac{L}{g}}\;K(m),
+        \qquad m = \sin^{2}\frac{\theta_0}{2}\\
+      K(m) &= \int_{0}^{\pi/2}\frac{d\varphi}{\sqrt{1-m\sin^{2}\varphi}}
+            = \frac{\pi}{2\,\operatorname{AGM}\!\left(1,\sqrt{1-m}\right)}\\
+      \operatorname{AGM}:\;\; a_{n+1} &= \frac{a_n+b_n}{2},\qquad b_{n+1} = \sqrt{a_n\,b_n},\qquad a_0 = 1,\; b_0 = \sqrt{1-m}
+    \end{aligned}` },
   { id: "H4", name: "free quadratic", label: "free coefficient",
-    tex: String.raw`T = 2\pi\sqrt{\frac{L}{g}}\left(1+c\,\theta_0^{2}\right)` },
+    tex: String.raw`T = 2\pi\sqrt{\frac{L}{g}}\left(1 + c\,\theta_0^{2}\right),
+      \qquad c \text{ fitted freely}\quad\left(\text{exact law: } c = \tfrac{1}{16} = 0.0625\right)` },
 ];
 const DAMP_LAWS = [
-  { id: "D1", name: "linear (viscous) damping", label: "viscous", tex: String.raw`A(t) = A_0\,e^{-a t}` },
+  { id: "D1", name: "linear (viscous) damping", label: "viscous",
+    tex: String.raw`\frac{dA}{dt} = -a\,A \;\;\Longrightarrow\;\; A(t) = A_0\,e^{-a t}` },
   { id: "D2", name: "quadratic (air drag) damping", label: "air drag",
-    tex: String.raw`A(t) = \frac{A_0}{1 + b\,A_0\,t}` },
-  { id: "D3", name: "dry (Coulomb) friction", label: "Coulomb", tex: String.raw`A(t) = A_0 - c\,t` },
+    tex: String.raw`\frac{dA}{dt} = -b\,A^{2} \;\;\Longrightarrow\;\; A(t) = \frac{A_0}{1 + b\,A_0\,t}` },
+  { id: "D3", name: "dry (Coulomb) friction", label: "Coulomb",
+    tex: String.raw`\frac{dA}{dt} = -c \;\;\Longrightarrow\;\; A(t) = A_0 - c\,t` },
   { id: "D4", name: "viscous + air drag", label: "combined",
-    tex: String.raw`A(t) = \frac{a\,A_0\,e^{-a t}}{a + b\,A_0\left(1 - e^{-a t}\right)}` },
+    tex: String.raw`\frac{dA}{dt} = -a\,A - b\,A^{2} \;\;\Longrightarrow\;\;
+      A(t) = \frac{a\,A_0\,e^{-a t}}{a + b\,A_0\left(1 - e^{-a t}\right)}` },
 ];
+const BIC_TEX = String.raw`\mathrm{BIC}_i = n\,\ln\frac{\mathrm{RSS}_i}{n} + k_i\ln n,
+  \qquad \Delta\mathrm{BIC}_i = \mathrm{BIC}_i - \min_j \mathrm{BIC}_j
+  \qquad \bigl(\le 2\ \text{leading},\; > 10\ \text{ruled out}\bigr)`;
 const LAW_BY_NAME = Object.fromEntries([...PERIOD_LAWS, ...DAMP_LAWS].map((l) => [l.name, l]));
 const LAYERS = { mask: true, trail: true, pivot: true, string: true, angle: true };
 
@@ -79,6 +100,7 @@ async function load() {
   if (TRIALS.length === 1) $("plots").classList.add("single");
   buildStatements();
   tex($("m-def"), String.raw`\theta = \operatorname{atan2}\!\left(x - x_p,\; y - y_p\right) - \theta_{\mathrm{eq}}`);
+  tex($("bic-def"), BIC_TEX);
   tex($("g-def"), String.raw`g = \frac{4\pi^{2} L_{\mathrm{eff}}}{T_0^{2}}, \qquad
       L_{\mathrm{eff}} = L + \frac{2r^{2}}{5L}, \qquad
       \sigma_g = g\sqrt{\left(\frac{\sigma_{\mathrm{fit}}}{g}\right)^{2} + \left(\frac{\sigma_L}{L}\right)^{2}}`);
@@ -121,8 +143,8 @@ function buildHyps(container, laws, key) {
     card.className = "hyp";
     card.dataset.id = law.id;
     card.innerHTML = `<div class="hname"><span class="id">${law.id}</span>${esc(law.label)}</div>
-      <div class="eq"></div><div class="badges"></div>`;
-    tex(card.querySelector(".eq"), String.raw`\displaystyle ` + law.tex, false);   // full-size maths, one line
+      <div class="badges"></div><div class="eq"></div>`;
+    tex(card.querySelector(".eq"), law.tex);
     card.addEventListener("mouseenter", () => { hoverLaw = law.id; });
     card.addEventListener("mouseleave", () => { hoverLaw = null; });
     el.appendChild(card);
