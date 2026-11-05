@@ -125,6 +125,12 @@ def cmd_replay(a, p):
         raise SystemExit(1)
 
 
+def cmd_showcase(a, p):
+    from .showcase import build
+
+    build(Path(a.out), feed=a.feed, reuse=a.reuse)
+
+
 def cmd_console(a, p):
     from .console import serve
 
@@ -261,6 +267,14 @@ def main():
     rp = sub.add_parser("replay", help="reproduce a published result from its cached SAM output (no API key)")
     rp.add_argument("folder", help="e.g. results/tomato1")
     rp.set_defaults(func=cmd_replay)
+
+    sc = sub.add_parser("showcase", help="static 'Kepler Lab Replay' page of the published real trials")
+    sc.add_argument("--out", default="docs/showcase")
+    sc.add_argument("--feed", action="store_true",
+                    help="generate the live feed with the scientist model if not cached (small API cost)")
+    sc.add_argument("--reuse", action="store_true",
+                    help="reuse the trial data and clips already in --out (skip the slow re-fit)")
+    sc.set_defaults(func=cmd_showcase)
 
     c = sub.add_parser("console", help="live Lab Console in the browser, following a session folder")
     c.add_argument("session")
