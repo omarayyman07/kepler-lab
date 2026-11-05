@@ -1,0 +1,92 @@
+:root { --bg:#0f1115; --card:#181b21; --card2:#1d2128; --line:#2a2e36; --fg:#e9eaee; --muted:#9aa0ab;
+        --amber:#f0a050; --red:#ff5d5d; --blue:#5aa9ff; --green:#5fd19a; --grey:#7d8590; --hl:#ffe08a; }
+* { box-sizing:border-box }
+html, body { margin:0; background:var(--bg); color:var(--fg) }
+body { font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif }
+a { color:var(--blue) }
+code, .mono { font-family:ui-monospace,Consolas,monospace; font-size:.85em }
+.muted { color:var(--muted) } .small { font-size:.82rem }
+
+header.top { min-width:0; display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; padding:16px 20px 6px; max-width:1700px; margin:0 auto }
+.brand { font-size:1.4rem; letter-spacing:.04em } .brand b { color:var(--amber) }
+.lede { flex-basis:100%; margin:2px 0 0; color:var(--muted); max-width:900px }
+.badge { font-size:.72rem; font-weight:800; letter-spacing:.06em; padding:2px 9px; border-radius:99px; border:1px solid currentColor; white-space:nowrap }
+.badge.real { color:var(--green) } .badge.flag { color:var(--red) }
+
+.layout { display:grid; grid-template-columns:minmax(0,65fr) minmax(0,35fr); gap:14px; padding:10px 20px 20px; max-width:1700px; margin:0 auto }
+@media (max-width:1100px) { .layout { grid-template-columns:minmax(0,1fr) } }
+.left, .right { display:flex; flex-direction:column; gap:12px; min-width:0 }
+.card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px }
+h2 { font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 8px }
+h3 { font-size:.95rem; margin:0 }
+
+.videos { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px }
+@media (max-width:700px) { .videos { grid-template-columns:minmax(0,1fr) } }
+.vcard { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px; min-width:0 }
+.vhead { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:6px }
+.vhead .dot { width:10px; height:10px; border-radius:50% }
+.stage { position:relative; width:100%; max-height:min(72vh, 760px); background:#000; border-radius:8px; overflow:hidden }
+.stage video, .stage canvas { position:absolute; inset:0; width:100%; height:100% }
+.stage video { object-fit:contain }
+.stage canvas { pointer-events:none }
+.readout { display:flex; flex-wrap:wrap; justify-content:space-between; gap:4px 12px; margin-top:8px }
+.readout .g { font-size:1.15rem; font-weight:700; font-variant-numeric:tabular-nums }
+.readout .g .katex { font-size:1.05em }
+.note { font-size:.78rem; color:var(--muted) }
+
+.transport { display:flex; flex-wrap:wrap; gap:10px; align-items:center }
+.transport input[type=range] { flex:1; min-width:160px; accent-color:var(--amber) }
+.btn { background:var(--card2); color:var(--fg); border:1px solid var(--line); border-radius:8px; padding:6px 12px; font:inherit; cursor:pointer }
+.btn:hover { border-color:var(--grey) }
+.btn.primary { background:var(--amber); color:#1a1205; border:0; font-weight:700; min-width:96px }
+.btn.speed.on { border-color:var(--amber); color:var(--amber) }
+.speeds { display:flex; gap:4px }
+.layers { display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center }
+.layers label { cursor:pointer; user-select:none }
+
+.statements { display:flex; flex-wrap:wrap; gap:8px }
+.stmt { text-align:left; background:var(--card2); border:1px solid var(--line); border-left:4px solid var(--grey); border-radius:8px; padding:7px 10px; color:var(--fg); font:inherit; font-size:.88rem; cursor:pointer; max-width:100% }
+.stmt:hover { border-color:var(--grey) }
+.stmt .when { color:var(--muted); font-size:.78rem; margin-left:6px }
+
+.math { overflow-x:auto; overflow-y:hidden; padding:2px 0 }
+.math .katex-display { margin:.4em 0 }
+.live { border-top:1px solid var(--line); margin-top:6px; padding-top:6px }
+.live .lbl { font-size:.78rem; font-weight:700; letter-spacing:.04em }
+.waiting { color:var(--muted); font-style:italic; font-size:.88rem; padding:4px 0 }
+
+.hyps { display:grid; gap:8px }
+.hyp { background:var(--card2); border:1px solid var(--line); border-radius:10px; padding:8px 10px; transition:border-color .2s, box-shadow .2s }
+.hyp.hl, .diag.hl { border-color:var(--hl); box-shadow:0 0 0 2px rgba(255,224,138,.25) }
+.hyp .row { display:flex; flex-wrap:wrap; gap:6px; align-items:center }
+.hyp .id { font-weight:800; color:var(--amber); margin-right:4px }
+.chip { display:inline-flex; gap:5px; align-items:center; font-size:.76rem; padding:1px 8px; border-radius:99px; border:1px solid var(--line); color:var(--muted); white-space:nowrap }
+.chip .dot { width:8px; height:8px; border-radius:50% }
+.chip.leading { color:var(--green); border-color:currentColor }
+.chip.alive { color:var(--amber); border-color:currentColor }
+.chip.ruled { color:var(--grey) } .chip.ruled .st { text-decoration:line-through }
+.chip.wait { font-style:italic }
+
+.plots { display:grid; grid-template-columns:1fr 1fr; gap:8px }
+@media (max-width:420px) { .plots { grid-template-columns:minmax(0,1fr) } }
+.plot canvas { width:100%; height:190px; display:block; background:var(--card2); border-radius:8px }
+.plot .cap { font-size:.78rem; color:var(--muted); margin-top:3px }
+
+.diag { background:var(--card2); border:1px solid var(--line); border-left:4px solid var(--red); border-radius:10px; padding:8px 10px; margin-bottom:8px }
+.diag p { margin:.3em 0 }
+
+#final-card { border-color:var(--green) }
+.final-grid { display:grid; grid-template-columns:1fr; gap:12px }
+.final-grid > div + div { border-top:1px solid var(--line); padding-top:10px }
+.final-grid .g { font-size:1.2rem; font-weight:800 }
+
+.feed { display:flex; flex-direction:column; gap:8px; max-height:420px; overflow:auto; padding-right:4px }
+.msg { background:var(--card2); border:1px solid var(--line); border-radius:12px 12px 12px 4px; padding:8px 10px; font-size:.9rem }
+.msg .meta { display:flex; gap:8px; align-items:center; font-size:.74rem; color:var(--muted); margin-bottom:3px }
+.msg.typing::after { content:"▍"; color:var(--amber); animation:blink 1s steps(1) infinite }
+@keyframes blink { 50% { opacity:0 } }
+
+.foot { max-width:1700px; margin:0 auto; padding:0 20px 24px }
+
+html, body { overflow-x:hidden }
+.lede { overflow-wrap:anywhere }

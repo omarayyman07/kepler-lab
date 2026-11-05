@@ -32,6 +32,8 @@ console_go.json
 !results/**/*.mp4
 !results/**/*.sam-*.txt
 !results/**/*.qc-*.txt
+!docs/**
+!docs/**/*.mp4
 
 # Editors / OS
 .vscode/

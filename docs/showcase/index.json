@@ -1,0 +1,58 @@
+{
+ "trials": [
+  "keys",
+  "shoelace"
+ ],
+ "statements": [
+  {
+   "trial": "shoelace",
+   "t": 6.515734599130033,
+   "law": "H3",
+   "diagnosis": "shoelace",
+   "overlay": "string",
+   "text": "Shoelace: the period implies a pendulum 2.3 cm shorter than measured"
+  },
+  {
+   "trial": "shoelace",
+   "t": 10.478687929539301,
+   "law": "H1",
+   "diagnosis": null,
+   "overlay": "angle",
+   "text": "Shoelace: the small-angle law is ruled out"
+  },
+  {
+   "trial": "shoelace",
+   "t": 12.460101504336091,
+   "law": "D1",
+   "diagnosis": null,
+   "overlay": "trail",
+   "text": "Shoelace: pure viscous damping is ruled out"
+  },
+  {
+   "trial": "keys",
+   "t": 14.102521590413303,
+   "law": "H1",
+   "diagnosis": null,
+   "overlay": "angle",
+   "text": "Keys: the small-angle law is ruled out"
+  },
+  {
+   "trial": "keys",
+   "t": 14.102521590413303,
+   "law": null,
+   "diagnosis": "keys",
+   "overlay": "pivot",
+   "text": "Keys: the swing is not a circle about the measured pivot"
+  },
+  {
+   "trial": "keys",
+   "t": 14.836800772288317,
+   "law": "H4",
+   "diagnosis": "keys",
+   "overlay": "trail",
+   "text": "Keys: the period rises with amplitude faster than the exact law allows"
+  }
+ ],
+ "g_local": 9.79,
+ "min_evidence_cycles": 5
+}
