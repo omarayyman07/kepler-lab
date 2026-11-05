@@ -72,9 +72,11 @@ async function load() {
   duration = Math.max(...TRIALS.map((T) => T.duration));
   $("scrub").max = duration.toFixed(2);
   TRIALS.forEach(buildVideo);
+  if (TRIALS.length === 1) { $("videos").classList.add("single"); $("plots").classList.add("single"); }
   buildHyps("hyps", PERIOD_LAWS, "period_laws");
   buildHyps("damps", DAMP_LAWS, "damping_laws");
   buildPlots();
+  if (TRIALS.length === 1) $("plots").classList.add("single");
   buildStatements();
   tex($("m-def"), String.raw`\theta = \operatorname{atan2}\!\left(x - x_p,\; y - y_p\right) - \theta_{\mathrm{eq}}`);
   tex($("g-def"), String.raw`g = \frac{4\pi^{2} L_{\mathrm{eff}}}{T_0^{2}}, \qquad

@@ -1,6 +1,5 @@
 {
  "trials": [
-  "keys",
   "shoelace"
  ],
  "statements": [
@@ -27,30 +26,6 @@
    "diagnosis": null,
    "overlay": "trail",
    "text": "Shoelace: pure viscous damping is ruled out"
-  },
-  {
-   "trial": "keys",
-   "t": 14.102521590413303,
-   "law": "H1",
-   "diagnosis": null,
-   "overlay": "angle",
-   "text": "Keys: the small-angle law is ruled out"
-  },
-  {
-   "trial": "keys",
-   "t": 14.102521590413303,
-   "law": null,
-   "diagnosis": "keys",
-   "overlay": "pivot",
-   "text": "Keys: the swing is not a circle about the measured pivot"
-  },
-  {
-   "trial": "keys",
-   "t": 14.836800772288317,
-   "law": "H4",
-   "diagnosis": "keys",
-   "overlay": "trail",
-   "text": "Keys: the period rises with amplitude faster than the exact law allows"
   }
  ],
  "g_local": 9.79,

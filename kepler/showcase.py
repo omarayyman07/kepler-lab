@@ -44,10 +44,12 @@ LAW_IDS = {"isochronous (small-angle)": "H1", "quadratic correction": "H2",
 DAMP_IDS = {"linear (viscous) damping": "D1", "quadratic (air drag) damping": "D2",
             "dry (Coulomb) friction": "D3", "viscous + air drag": "D4"}
 
+# Trials shown on the page. The keys run (results/real1) is left out of the page by choice;
+# to show it again, add back:
+#   {"id": "keys", "result": "results/real1", "clip": "sessions/real1/trial01.mp4",
+#    "title": "Keys on a ring, thick doubled cord", "short": "Keys",
+#    "setup": "bunch of keys on a doubled cord, handheld phone", "colour": "#5aa9ff"},
 TRIALS = [
-    {"id": "keys", "result": "results/real1", "clip": "sessions/real1/trial01.mp4",
-     "title": "Keys on a ring, thick doubled cord", "short": "Keys",
-     "setup": "bunch of keys on a doubled cord, handheld phone", "colour": "#5aa9ff"},
     {"id": "shoelace", "result": "results/tomato1", "clip": "sessions/tomato1/trial01.mp4",
      "title": "Tomato on a heavy shoelace", "short": "Shoelace",
      "setup": "tomato in a plastic bag on a shoelace, phone about 14° off square", "colour": "#f0a050"},
@@ -394,9 +396,11 @@ def make_feed(trial: dict) -> tuple[list[dict], dict]:
 def statements(trials: dict) -> list[dict]:
     """Clickable evidence: the first moment each piece of evidence holds in the causal data."""
     out = []
-    k, s = trials["keys"], trials["shoelace"]
+    k, s = trials.get("keys"), trials.get("shoelace")   # only the trials on the page
 
     def first(trial, cond):
+        if trial is None:
+            return None
         return next((x for x in trial["snapshots"] if x["n"] >= MIN_EVIDENCE_CYCLES and cond(x)), None)
 
     x = first(k, lambda x: "c" in x and x.get("leading") == "free quadratic"

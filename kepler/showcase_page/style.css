@@ -90,3 +90,7 @@ h3 { font-size:.95rem; margin:0 }
 
 html, body { overflow-x:hidden }
 .lede { overflow-wrap:anywhere }
+
+/* one trial: a single video and plot, kept at a comfortable width */
+.videos.single, .plots.single { grid-template-columns:minmax(0,1fr) }
+.videos.single .vcard { max-width:760px; width:100%; justify-self:center }
