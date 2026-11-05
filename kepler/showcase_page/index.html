@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kepler Lab Replay</title>
+<meta name="description" content="Two real pendulum trials replayed in the browser: SAM 3.1 track, competing laws ranked by BIC, and g converging cycle by cycle.">
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<link rel="stylesheet" href="style.css">
+<script defer src="vendor/katex/katex.min.js"></script>
+<script defer src="vendor/katex/auto-render.min.js"></script>
+<script defer src="app.js"></script>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><b>KEPLER</b> Lab Replay</div>
+  <span class="badge real">REAL DATA</span>
+  <p class="lede">Two real pendulum trials, replayed from their measurement files. The clips are the
+    real footage; every line, angle and equation is drawn live from the analysis, and the science
+    panel only knows the cycles completed so far.</p>
+</header>
+
+<main class="layout">
+  <section class="left">
+    <div class="videos" id="videos"></div>
+
+    <div class="transport card">
+      <button id="play" class="btn primary" aria-label="Play">▶ Play</button>
+      <input id="scrub" type="range" min="0" max="1" step="0.01" value="0" aria-label="Timeline">
+      <span id="clock" class="mono">0.00 s</span>
+      <div class="speeds" role="group" aria-label="Speed">
+        <button class="btn speed" data-rate="0.5">0.5×</button>
+        <button class="btn speed on" data-rate="1">1×</button>
+        <button class="btn speed" data-rate="2">2×</button>
+      </div>
+    </div>
+
+    <div class="layers card">
+      <span class="muted">Overlay layers</span>
+      <label><input type="checkbox" data-layer="mask" checked> mask</label>
+      <label><input type="checkbox" data-layer="trail" checked> trail</label>
+      <label><input type="checkbox" data-layer="pivot" checked> pivot</label>
+      <label><input type="checkbox" data-layer="string" checked> string (model)</label>
+      <label><input type="checkbox" data-layer="angle" checked> angle</label>
+    </div>
+
+    <div class="card">
+      <h2>Evidence: click to jump to the moment it appears</h2>
+      <div class="statements" id="statements"></div>
+    </div>
+  </section>
+
+  <aside class="right">
+    <div class="card" id="final-card" hidden></div>
+
+    <div class="card">
+      <h2>Measurement</h2>
+      <div class="math" id="m-def"></div>
+      <div id="m-live"></div>
+    </div>
+
+    <div class="card">
+      <h2>Period: competing laws</h2>
+      <div class="hyps" id="hyps"></div>
+    </div>
+
+    <div class="card">
+      <h2>Solving for g with the leading law</h2>
+      <div class="math" id="g-def"></div>
+      <div id="g-live"></div>
+    </div>
+
+    <div class="card">
+      <h2>Period against amplitude, cycles so far</h2>
+      <div class="plots" id="plots"></div>
+    </div>
+
+    <div class="card">
+      <h2>Damping: competing laws</h2>
+      <div class="hyps" id="damps"></div>
+    </div>
+
+    <div class="card">
+      <h2>Diagnosis</h2>
+      <div id="diagnoses"><p class="muted">Diagnosis cards appear when the evidence for them exists.</p></div>
+    </div>
+
+    <div class="card feed-card">
+      <h2>Kepler's live feed</h2>
+      <p class="muted small">Kepler (Muse Wonder) · generated from the measured data. Every number in a
+        message was checked against the data at that moment.</p>
+      <div class="feed" id="feed"></div>
+    </div>
+  </aside>
+</main>
+
+<footer class="foot muted small">
+  Source: <code>results/real1</code> and <code>results/tomato1</code> in
+  <a href="https://github.com/omarayyman07/kepler-lab">kepler-lab</a>, tracked by SAM 3.1.
+  Reproduce with <code>python -m kepler replay results/real1</code>. Page built by
+  <code>python -m kepler showcase</code>; fully offline, KaTeX vendored.
+</footer>
+</body>
+</html>
