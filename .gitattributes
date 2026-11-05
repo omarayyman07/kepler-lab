@@ -1,0 +1,2 @@
+# Published results are byte-exact (raw SAM wire output, replay data): no line-ending conversion
+results/** -text
